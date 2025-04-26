@@ -12,12 +12,8 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
   };
 
   match req.headers().get("Origin").unwrap() {
-    Some(origin) => {
-      if origin != allowed_origin {
-        return Response::error("403 Unauthorized", 403);
-      }
-    },
-    None => return Response::error("403 Unauthorized", 403)
+    Some(origin) if origin == allowed_origin => (),
+    _ => return Response::error("403 Unauthorized", 403),
   };
 
   let url: Url = req.url().unwrap();
