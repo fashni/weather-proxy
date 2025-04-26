@@ -4,10 +4,10 @@ use worker::*;
 #[event(fetch)]
 async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
   console_error_panic_hook::set_once();
-  const ALLOWED_ORIGIN: &str = "https://fashni.github.io";
+  let allowed_origin: String = env.var("ALLOWED_ORIGIN").unwrap().to_string();
   match req.headers().get("Origin").unwrap() {
     Some(origin) => {
-      if origin != ALLOWED_ORIGIN {
+      if origin != allowed_origin {
         return Response::error("403 Unauthorized", 403);
       }
     },
@@ -25,7 +25,7 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         "{\"cod\": \"400\", \"message\": \"missing city param\"}"
       ).map(|mut resp: Response| {
         resp.headers_mut().set("Content-Type", "application/json").unwrap();
-        resp.headers_mut().set("Access-Control-Allow-Origin", ALLOWED_ORIGIN).unwrap();
+        resp.headers_mut().set("Access-Control-Allow-Origin", &allowed_origin).unwrap();
         resp.with_status(400)
       })
     }
@@ -43,7 +43,7 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
   let text: String = res.text().await?;
   Response::ok(text).map(|mut resp: Response| {
     resp.headers_mut().set("Content-Type", "application/json").unwrap();
-    resp.headers_mut().set("Access-Control-Allow-Origin", ALLOWED_ORIGIN).unwrap();
+    resp.headers_mut().set("Access-Control-Allow-Origin", &allowed_origin).unwrap();
     resp
   })
 }
